@@ -44,7 +44,6 @@ int main(int argc, char * argv[])
 	int i = 0;
 	pthread_t thread_id_server, thread_id_client, thread_id_server_send;
 
-
 	random_seed = atol(argv[4]);
 	grid_size = atoi(argv[1]);
 	sock = socket (AF_INET, SOCK_STREAM, 0);
@@ -64,7 +63,7 @@ int main(int argc, char * argv[])
 
 	listen (sock, 5);
 	fromlength = sizeof (from);
-
+	/*
 	while((client_sock = accept(sock, (struct sockaddr*) & from, & fromlength)) != -1)
     {
 		printf("accept successfully!");
@@ -75,4 +74,5 @@ int main(int argc, char * argv[])
 	outnum = htonl (number);
 
 	sleep(1);
+	*/
 }
