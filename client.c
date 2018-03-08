@@ -34,27 +34,27 @@ void* key_handler_thread(void* param)
 	printf("thread created\n");
 	while (0) {
 		switch(key_pressed)
-    {
-        case '+':
-            printf("+");
-            break;
+		    {
+		        case '+':
+		            printf("+");
+		            break;
 
-        case '-':
-						printf("+");
-            break;
+		        case '-':
+								printf("+");
+		            break;
 
-        case '*':
-						printf("+");
-            break;
+		        case '*':
+								printf("+");
+		            break;
 
-        case '/':
-						printf("+");
-            break;
+		        case '/':
+								printf("+");
+		            break;
 
-        // operator is doesn't match any case constant (+, -, *, /)
-        default:
-            printf("ignore");
-    }
+		        // operator is doesn't match any case constant (+, -, *, /)
+		        default:
+		            printf("ignore");
+		    }
 
 		printf("keyboard handler created\n");
 		pthread_mutex_lock(&mutex);
@@ -69,7 +69,7 @@ void* key_handler_thread(void* param)
 
 int main()
 {
-  pthread_t thread_key;
+  	pthread_t thread_key;
 	int sign = 0;
 	int rtv;
 
@@ -97,11 +97,12 @@ int main()
 
 	bzero(temp_data,11);
 	// receive init data
-	temp_data[0] = 'A';
-	temp_data[2] = 'B';
+	temp_data[0] = 'c';
 
-	send(sock,temp_data,11,0);
-	//recv(sock,temp_data,7,0);
+	//send(sock,temp_data,11,0);
+	recv(sock,temp_data,5,0);
+	printf("recv success\n");
+	printf("%s\n", temp_data);
 
 	/*******************************************************
 	block for setting local data
@@ -112,14 +113,18 @@ int main()
 		exit (1);
 	}
 
+	/*
 	while (sign = recv(sock,temp_data,7,0)) {
-		printf("recv success\n");
+		//printf("recv success\n");
 		pthread_mutex_lock(&mutex);
 		printf("%s\n",temp_data);
 		pthread_mutex_unlock(&mutex);
 
 	}
-
+	*/
+	while(1){
+		sleep(100);
+	}
 	// Now we print out the character array to reveal that only 5 bytes were
 	// received.
 	close (sock);
