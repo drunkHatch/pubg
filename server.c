@@ -31,23 +31,22 @@ void* server_loop(void *arg) {
 		/*while (1) {
 			recv(sock,tab,3,0);
 			pthread_mutex_lock(&mutex);
-		
+
 			//update positon
 			pthread_mutex_unlock(&mutex);
 		}*/
     }
 
-
 int main(int argc, char * argv[])
 {
 	struct	sockaddr_in	master, from;
 	int client_sock;
-	grid_size = atoi(argv[1]);
 	int i = 0;
-	random_seed = atol(argv[4]);
 	pthread_t thread_id_server, thread_id_client, thread_id_server_send;
 
 
+	random_seed = atol(argv[4]);
+	grid_size = atoi(argv[1]);
 	sock = socket (AF_INET, SOCK_STREAM, 0);
 	if (sock < 0) {
 		perror ("Server: cannot open master socket");
@@ -62,10 +61,10 @@ int main(int argc, char * argv[])
 		perror ("Server: cannot bind master socket");
 		exit (1);
 	}
-	
+
 	listen (sock, 5);
 	fromlength = sizeof (from);
-	
+
 	while((client_sock = accept(sock, (struct sockaddr*) & from, & fromlength)) != -1)
     {
 		printf("accept successfully!");
