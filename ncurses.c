@@ -21,8 +21,10 @@ void create_player(bool flag,int direction);
 
 int main(int argc, char *argv[])
 {	WIN win;
+	WIN p_win;
+	
 	int ch;
-
+	int direction;
 	initscr();			/* Start curses mode 		*/
 	curs_set(0);
 	cbreak();			/* Line buffering disabled, Pass on
@@ -32,33 +34,42 @@ int main(int argc, char *argv[])
 	
 
 	/* Initialize the window parameters */
-	init_win_params(&win);
+	init_win_params(&p_win);
 	refresh();
 	
-	create_box(&win);
+	create_box(&p_win);
 	create_player(TRUE,3);
-	int direction;
+	
 	while((ch = getch()))
 	{	switch(ch)
-		{	case KEY_LEFT:
-				create_player(FALSE,1);
-				--player_x;
-				create_player(TRUE,1);
+		{	case 'j':
+				if(player_x > p_win.startx+1){
+					create_player(FALSE,1);
+					--player_x;
+					create_player(TRUE,1);
+				}
 				break;
-			case KEY_RIGHT:
-				create_player(FALSE,2);
-				++player_x;
-				create_player(TRUE,2);
+			case 'l':
+				if(player_x < p_win.startx+p_win.width-1 ){
+					create_player(FALSE,2);
+					++player_x;
+					create_player(TRUE,2);
+				}
+				
 				break;
-			case KEY_UP:
-				create_player(FALSE,3);
-				--player_y;
-				create_player(TRUE,3);
+			case 'i':
+				if(player_y > p_win.starty+1 ){
+					create_player(FALSE,3);
+					--player_y;
+					create_player(TRUE,3);
+				}
 				break;
-			case KEY_DOWN:
-				create_player(FALSE,4);
-				++player_y;
-				create_player(TRUE,4);
+			case 'k':
+				if(player_y < p_win.starty+p_win.height-1 ){
+					create_player(FALSE,4);
+					++player_y;
+					create_player(TRUE,4);
+				}
 				break;	
 		}
 	}
@@ -110,21 +121,23 @@ void create_player(bool flag,int direction){
 	
 	if(flag == TRUE && direction == 1)
 	{	mvaddch(player_y, player_x, '<');
-
+	
 	}
-	if(flag == TRUE && direction == 2)
+	else if(flag == TRUE && direction == 2)
 	{	mvaddch(player_y, player_x, '>');
 
 	}
-	if(flag == TRUE && direction == 3)
+	else if(flag == TRUE && direction == 3)
 	{	mvaddch(player_y, player_x, '^');
 
 	}
-	if(flag == TRUE && direction == 4)
+	else if(flag == TRUE && direction == 4)
 	{	mvaddch(player_y, player_x, 'v');
 
 	}
-	else
+	else{
 		mvaddch(player_y, player_x, ' ');
+	}
+	
 	refresh();
 }
