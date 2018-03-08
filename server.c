@@ -63,7 +63,7 @@ int main(int argc, char * argv[])
 
 	listen (sock, 5);
 	fromlength = sizeof (from);
-	/*
+
 	while((client_sock = accept(sock, (struct sockaddr*) & from, & fromlength)) != -1)
     {
 		printf("accept successfully!");
@@ -74,5 +74,5 @@ int main(int argc, char * argv[])
 	outnum = htonl (number);
 
 	sleep(1);
-	*/
+	
 }
