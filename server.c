@@ -18,14 +18,66 @@ int grid_size;
 int player_id = 0;
 int random_seed;
 
+static void sig_handler(int signo){
+    sigset_t signal_set;
+
+    sigemptyset(&signal_set);
+
+    if (signo == SIGINT){
+        sigaddset(&signal_set, SIGALRM);
+        sigprocmask(0, &signal_set, NULL);
+
+        sigprocmask(1, &signal_set, NULL);
+		/*******************************/
+		// send signals to threads to cut connection
+		exit(1);
+		/*******************************/
+    }
+    else if (signo == SIGALRM){
+        sigaddset(&signal_set, SIGINT);
+        sigaddset(&signal_set, SIGUSR1);
+        sigprocmask(0, &signal_set, NULL);
+        system("date");
+        dir = opendir(path);
+        if (ENOENT == errno){
+      //directory does not exist
+          printf("Directory has been deleted!\n");
+          exit(1);
+        }
+        dir_grabber(dir);
+        closedir(dir);
+        struct_move();
+        reporter();
+				signal (SIGALRM, sig_handler);
+        alarm(period);
+        sigprocmask(1, &signal_set, NULL);
+
+    }
+    else if (signo == SIGUSR1){
+        sigaddset(&signal_set, SIGALRM);
+        sigaddset(&signal_set, SIGINT);
+        sigprocmask(0, &signal_set, NULL);
+        system("date");
+        dir = opendir(path);
+        if (ENOENT == errno){
+      //directory does not exist
+          printf("Directory has been deleted!\n");
+          exit(1);
+        }
+        dir_grabber(dir);
+        closedir(dir);
+        struct_move();
+        reporter();
+        signal(SIGUSR1, sig_handler);
+        sigprocmask(1, &signal_set, NULL);
+
+    }
+}
+
 void* server_loop(int *arg) {
 		char imp[7];
 		int local_socket;
-		/*
-		int position_x;
-		int position_y;
-		int position[2];
-		*/
+
 		local_socket = *arg;
 		pthread_mutex_unlock(&mutex_socket);
 		printf("enter server_loop\n");
@@ -38,25 +90,7 @@ void* server_loop(int *arg) {
 
 		send(local_socket,imp,7,0);   //send dimension of board
 		printf("%d\n", local_socket);
-		//send(sock,player_id,1,0);    //send id of player
-		//srand(random_seed);
 
-		/*
-		position_x = rand() % grid_size;
-		position_y = rand() % grid_size;
-		printf("%d\n", position_x);
-		position[0] = position_x;
-		position[1] = position_y;
-		*/
-		/*
-		while (1) {
-			recv(sock,tab,3,0);
-			pthread_mutex_lock(&mutex);
-
-			//update positon
-			pthread_mutex_unlock(&mutex);
-		}
-		*/
 		close(local_socket);
     }
 
