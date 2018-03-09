@@ -58,6 +58,7 @@ char message_to_send[SEND_LENGTH];
 char message_to_recv[RECV_LENGTH];
 char message_init[INIT_LENGTH];
 
+WIN p_win;
 
 void create_bullet(WIN *p_win,bool flag,int direction){
 	if(flag == TRUE){
@@ -216,58 +217,49 @@ void create_box(WIN *p_win)
 	refresh();
 }
 
-/*
+
 void* key_handler_thread(WIN *p_win )
 {
 	int ch;
+	char sender[2];
 
 	printf("thread created\n");
 	while((ch = getch()))
 	{	switch(ch)
 		{	case 'j':
-				create_bullet(p_win,FALSE,direction);
-				if(player_x > p_win->startx+1){
-					direction = 1;
-					create_player(FALSE,direction);
-					--player_x;
-					create_player(TRUE,direction);
-				}
+				send(sock,"j",1,0);   //send init data
+				perror ("Client: entered thread");
+				exit (1);
 				break;
 			case 'l':
-				create_bullet(p_win,FALSE,direction);
-				if(player_x < p_win->startx+p_win->width-1 ){
-					direction = 2;
-					create_player(FALSE,direction);
-					++player_x;
-					create_player(TRUE,direction);
-				}
+				send(sock,"l",1,0);   //send init data
+				printw("info");
+
 				break;
 			case 'i':
-				create_bullet(p_win,FALSE,direction);
-				if(player_y > p_win->starty+1 ){
-					direction = 3;
-					create_player(FALSE,direction);
-					--player_y;
-					create_player(TRUE,direction);
-				}
+				send(sock,"i",1,0);   //send init data
+				printw("info");
+
 				break;
 			case 'k':
-				create_bullet(p_win,FALSE,direction);
-				if(player_y < p_win->starty+p_win->height-1 ){
-					direction = 4;
-					create_player(FALSE,direction);
-					++player_y;
-					create_player(TRUE,direction);
-				}
-				break;
+				send(sock,"k",1,0);   //send init data
+				printw("info");
 
+				break;
+			case 'x':
+				send(sock,"x",1,0);   //send init data
+				printw("info");
+
+				break;
 			case ' ':
-				create_bullet(p_win,TRUE,direction);
+				send(sock,' ',1,0);   //send init data
+				printw("info");
+
 				break;
 		}
 	}
 }
-*/
+
 int main(int argc, char *argv[])
 {
   	pthread_t thread_key;
@@ -279,7 +271,7 @@ int main(int argc, char *argv[])
 	int grid_size;
 	int id;
 
-	WIN p_win; // window variable
+	 // window variable
 
 	host = gethostbyname("localhost");
 
@@ -305,33 +297,33 @@ int main(int argc, char *argv[])
 		exit (1);
 	}
 
-	/*
+
 	if ((thread_rtv = pthread_create(&thread_key, NULL, key_handler_thread, &p_win))) {
 		perror("key thread create failed");
 		exit (1);
 	}
-	*/
+
 	bzero(message_to_recv,RECV_LENGTH);
 	// receive init data
 	recv(sock,message_init,INIT_LENGTH,0);
 	grid_size = atoi(message_init);
-	bzero(message_to_send,10);
+	bzero(message_init,10);
 	recv(sock,message_init,10,0);
 	id = atoi(message_init);
 	bzero(message_to_send,5);
 	recv(sock,message_init,5,0);
 	player_x = atoi(message_init);
-	bzero(message_to_send,5);
+	bzero(message_init,5);
 	recv(sock,message_init,5,0);
 	player_y = atoi(message_init);
 	// update backend info
 
-	/*
-	p_win->startx = 1;
-	p_win->starty = 1;
-	p_win->width = grid_size + 1;
-	p_win->height = grid_size + 1;
-	*/
+
+	p_win.startx = 1;
+	p_win.starty = 1;
+	p_win.width = grid_size + 1;
+	p_win.height = grid_size + 1;
+
 	// init game
 	/*******************************/
 	// initialization of window

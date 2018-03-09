@@ -46,7 +46,7 @@ typedef struct _WIN_struct {
 }WIN;
 
 
-//int	sock, snew, fromlength, number, outnum;
+//int sock, snew, fromlength, number, outnum;
 typedef struct{
 	int id;
 	int kills;
@@ -122,6 +122,13 @@ char *init_message_prep(){
 
 }
 
+int calculate_key(){
+
+
+
+
+}
+
 void* server_loop(int *arg) {
 
 		char message_init[INIT_LENGTH];
@@ -143,8 +150,8 @@ void* server_loop(int *arg) {
 		connection_count++;
 		this_thread.connection_number = connection_count;
 		this_thread.current_id = pthread_self(); // get current thread id
-		//thread_array = (TRACKER *)realloc(thread_array, thread_length * ID_SIZE); // alloc places for new id
-		//thread_array[thread_length - 1] = this_thread; // add new thread to records
+		thread_array = (TRACKER *)realloc(thread_array, thread_length * ID_SIZE); // alloc places for new id
+		thread_array[thread_length - 1] = this_thread; // add new thread to records
 
 		pthread_mutex_unlock(&mutex_socket);
 		pthread_mutex_unlock(&mutex_thread_array);
@@ -183,14 +190,17 @@ void* server_loop(int *arg) {
 		bzero(message_to_send,INIT_LENGTH);
 		//send(local_socket,message_init,INIT_LENGTH,0);   //send init data
 
-
-		while ((recv_rtv = recv(local_socket,message_to_recv,RECV_LENGTH,0)) >= 0) {
+		bzero(message_to_recv,1);
+		printf("pass\n");		
+		while ((recv_rtv = recv(local_socket,message_to_recv,1,0)) >= 0) {
 			//do something to raw_data
-
+			printf("%d\n", recv_rtv);
+			printf("%c\n", message_to_recv[0]);
 
 
 			// wait for sending signal (SIGUSR1)
-			sigsuspend(&signal_set);
+			bzero(message_to_recv,1);
+			//sigsuspend(&signal_set);
 			//send(local_socket,raw_data,7,0); //send data to client here
 		}
 
@@ -221,7 +231,7 @@ int main(int argc, char * argv[])
 	signal(SIGALRM, sig_handler);
 	signal(SIGTERM, sig_handler);
 
-	//thread_array = (TRACKER *)malloc(0);
+	thread_array = (TRACKER *)malloc(0);
 	random_seed = atol(argv[4]);
 	grid_size = atoi(argv[1]);
 	raw_grid_size = argv[1];
@@ -257,7 +267,7 @@ int main(int argc, char * argv[])
 	//outnum = htonl (number);
 
 	//update positon
-	//alarm(interval);
+	alarm(interval);
 	while((client_sock = accept(sock, (struct sockaddr*) &from, &fromlength)) != -1)
     {
 
@@ -275,8 +285,6 @@ int main(int argc, char * argv[])
 			exit (1);
 		}
 
-		//pthread_mutex_lock(&mutex_socket);
-		//pthread_mutex_lock(&mutex_thread_array);
     }
 	sleep(1);
 	printf("reach EOF\n");
