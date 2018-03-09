@@ -1,7 +1,9 @@
 #include <ncurses.h>
 
+#define INIT_DIRECTION 3
+
 typedef struct _win_border_struct {
-	chtype 	ls, rs, ts, bs, 
+	chtype 	ls, rs, ts, bs,
 	 	tl, tr, bl, br;
 }WIN_BORDER;
 
@@ -12,20 +14,23 @@ typedef struct _WIN_struct {
 	WIN_BORDER border;
 }WIN;
 
+int map[grid_size][grid_size] = {0};
+
 int player_x = 3;
 int player_y = 5;
+
 void init_win_params(WIN *p_win);
-void print_win_params(WIN *p_win);
 void create_box(WIN *win);
 void create_player(bool flag,int direction);
 void create_bullet(WIN *p_win,bool flag,int direction);
 
-int direction = 3;
+int direction = INIT_DIRECTION;
 
 int main(int argc, char *argv[])
-{	WIN win;
+{
+	WIN win;
 	WIN p_win;
-	
+
 	int ch;
 	initscr();			/* Start curses mode 		*/
 	curs_set(0);
@@ -33,15 +38,15 @@ int main(int argc, char *argv[])
 					 * everty thing to me 		*/
 	keypad(stdscr, TRUE);		/* I need that nifty F1 	*/
 	noecho();
-	
+
 
 	/* Initialize the window parameters */
 	init_win_params(&p_win);
 	refresh();
-	
+
 	create_box(&p_win);
 	create_player(TRUE,3);
-	
+
 	while((ch = getch()))
 	{	switch(ch)
 		{	case 'j':
@@ -79,12 +84,12 @@ int main(int argc, char *argv[])
 					++player_y;
 					create_player(TRUE,direction);
 				}
-				break;	
+				break;
 
 			case ' ':
 				create_bullet(&p_win,TRUE,direction);
 				break;
-				
+
 
 		}
 	}
@@ -98,7 +103,7 @@ void init_win_params(WIN *p_win)
 {
 	p_win->height = 10;
 	p_win->width = 10;
-	p_win->starty = 1;	
+	p_win->starty = 1;
 	p_win->startx = 1;
 
 	p_win->border.ls = '|';
@@ -121,7 +126,7 @@ void create_box(WIN *p_win)
 	w = p_win->width;
 	h = p_win->height;
 
-	
+
 	mvaddch(y, x, p_win->border.tl);
 	mvaddch(y, x + w, p_win->border.tr);
 	mvaddch(y + h, x, p_win->border.bl);
@@ -136,7 +141,7 @@ void create_box(WIN *p_win)
 
 
 void create_player(bool flag,int direction){
-	
+
 	if(flag == TRUE && direction == 1)
 	{	mvaddch(player_y, player_x, '<');}
 
@@ -173,7 +178,7 @@ void create_bullet(WIN *p_win,bool flag,int direction){
 					mvaddch(player_y, player_x-1, 'o');
 					attroff(A_BOLD);
 				}
-				
+
 				break;
 
 			case 2:
@@ -188,7 +193,7 @@ void create_bullet(WIN *p_win,bool flag,int direction){
 					mvaddch(player_y, player_x+1, 'o');
 					attroff(A_BOLD);
 				}
-				
+
 				break;
 
 			case 3:
@@ -209,7 +214,7 @@ void create_bullet(WIN *p_win,bool flag,int direction){
 				if(player_y < p_win->starty+p_win->height-2){
 					attron(A_BOLD);
 					mvaddch(player_y+1, player_x, 'o');
-					
+
 					mvaddch(player_y+2, player_x, 'o');
 					attroff(A_BOLD);
 				}
@@ -224,7 +229,7 @@ void create_bullet(WIN *p_win,bool flag,int direction){
 
 	else {
 		switch(direction)
-		{	case 1:	
+		{	case 1:
 				mvaddch(player_y, player_x-1, ' ');
 				mvaddch(player_y, player_x-2, ' ');
 				break;
@@ -242,11 +247,8 @@ void create_bullet(WIN *p_win,bool flag,int direction){
 				mvaddch(player_y+1, player_x, ' ');
 				mvaddch(player_y+2, player_x, ' ');
 				break;
-	    }	
+	    }
 	}
 
 	refresh();
 	}
-
-
-
