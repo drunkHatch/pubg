@@ -13,6 +13,7 @@
 #define	MY_PORT 2224
 #define SEND_LENGTH 100
 #define RECV_LENGTH 100
+#define INIT_LENGTH 100
 
 /* ---------------------------------------------------------------------
    This is a sample client program for the number server. The client and
@@ -27,10 +28,10 @@ int init_sign = 0;
 int	sock, number;
 struct sockaddr_in server;
 struct hostent *host;
-char temp_sent;
 
 char message_to_send[SEND_LENGTH];
 char message_to_recv[RECV_LENGTH];
+char message_init[INIT_LENGTH];
 
 void* key_handler_thread(void* param)
 {
@@ -62,12 +63,13 @@ void* key_handler_thread(void* param)
 		    }
 
 		printf("keyboard handler created\n");
+		bzero(message_to_send, SEND_LENGTH);
 		pthread_mutex_lock(&mutex);
 		other_data = 2;
-		temp_data[0] = 'a';
+		message_to_send[0] = 'a';
 		printf("other_data: %d\n", other_data);
+		send(sock,message_to_send,SEND_LENGTH,0);
 		pthread_mutex_unlock(&mutex);
-		send(sock,temp_data,11,0);
 
 	}
 }
@@ -76,7 +78,7 @@ int main()
 {
   	pthread_t thread_key;
 	int sign = 0;
-	int rtv;
+	int recv_rtv, thread_rtv;
 
 	host = gethostbyname("localhost");
 
@@ -102,44 +104,31 @@ int main()
 		exit (1);
 	}
 
+	if ((thread_rtv = pthread_create(&thread_key, NULL, key_handler_thread, NULL))) {
+		perror("key thread create failed");
+		exit (1);
+	}
+
 	bzero(message_to_recv,RECV_LENGTH);
 	// receive init data
+	recv(sock,message_init,INIT_LENGTH,0);
+	// init game
+	// init map
+	// update backend info
 
-	//send(sock,temp_data,11,0);
-	//recv(sock,temp_data,5,0);
 	while ((recv_rtv = recv(sock,message_to_recv,RECV_LENGTH,0)) >= 0) {
 		//do something to message_to_recv
+		//recv commands first then go to different function to eat data
 
 		// translate message to operations
 
-		// wait for sending signal (SIGUSR1)
+		// init for next loop
+		bzero(message_to_recv,RECV_LENGTH);
 	}
 	if (recv_rtv < 0) {
 		perror("recv error\n");
 		exit(1);
 	}
-	/*******************************************************
-	block for setting local data
-	*******************************/
-
-	if ((rtv = pthread_create(&thread_key, NULL, key_handler_thread, NULL))) {
-		printf("%d\n", rtv);
-		exit (1);
-	}
-
-	/*
-	while (sign = recv(sock,temp_data,7,0)) {
-		//printf("recv success\n");
-		pthread_mutex_lock(&mutex);
-		printf("%s\n",temp_data);
-		pthread_mutex_unlock(&mutex);
-
-	}
-	*/
-	while(1){
-		sleep(100);
-	}
-	// Now we print out the character array to reveal that only 5 bytes were
-	// received.
+	
 	close (sock);
 }

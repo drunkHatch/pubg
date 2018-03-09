@@ -8,6 +8,23 @@
 #include <pthread.h>
 #include <signal.h>
 
+#include <stdio.h>
+#include <signal.h>
+#include <unistd.h>
+#include <time.h>
+#include <stdlib.h>
+#include <dirent.h>
+#include <string.h>
+#include <sys/types.h>
+#include <sys/stat.h>
+#include <fcntl.h> //optional
+#include <sys/inotify.h>
+#include <inttypes.h>
+#include <limits.h>
+#include <errno.h>
+#include <sys/time.h>
+
+
 #define	MY_PORT	2224
 #define ID_SIZE (sizeof(TRACKER))
 
@@ -52,7 +69,6 @@ static void sig_handler(int signo){
         sigaddset(&signal_set, SIGALRM);
         sigprocmask(0, &signal_set, NULL);
 
-        sigprocmask(1, &signal_set, NULL);
 		/*******************************/
 		// send signals to threads to cut connection
 		exit(1);
@@ -94,7 +110,7 @@ void* server_loop(int *arg) {
 		pthread_mutex_unlock(&mutex_socket);
 		pthread_mutex_unlock(&mutex_thread_array);
 		// critical section ends
-
+git
 		// add sending signal(SIGUSR1) to signal_set
 		sigemptyset(&signal_set);
 		sigaddset(&signal_set, SIGUSR1);
@@ -120,8 +136,6 @@ void* server_loop(int *arg) {
 		raw_data[2] = 'P';
 		raw_data[3] = 'D';
 
-
-
 		close(local_socket);
     }
 
@@ -134,7 +148,6 @@ int main(int argc, char * argv[])
 
 	signal(SIGALRM, sig_handler);
 	signal(SIGTERM, sig_handler);
-	signal(SIGUSR1, thread_sig_handler);
 
 	thread_array = (TRACKER *)malloc(0);
 	random_seed = atol(argv[4]);
