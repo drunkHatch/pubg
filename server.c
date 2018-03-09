@@ -114,7 +114,7 @@ int random_func(){
 	int rtv, temp;
 
 	temp = rand();
-	rtv = (temp % grid_size) + 1;
+	rtv = temp % grid_size;
 	return rtv;
 }
 
@@ -124,7 +124,6 @@ char *init_message_prep(){
 
 void* server_loop(int *arg) {
 
-		char raw_data[7];
 		char message_init[INIT_LENGTH];
 		char message_to_recv[RECV_LENGTH];
 		char message_to_send[SEND_LENGTH];
@@ -147,8 +146,8 @@ void* server_loop(int *arg) {
 		//thread_array = (TRACKER *)realloc(thread_array, thread_length * ID_SIZE); // alloc places for new id
 		//thread_array[thread_length - 1] = this_thread; // add new thread to records
 
-		//pthread_mutex_unlock(&mutex_socket);
-		//pthread_mutex_unlock(&mutex_thread_array);
+		pthread_mutex_unlock(&mutex_socket);
+		pthread_mutex_unlock(&mutex_thread_array);
 		// critical section ends
 
 		// add sending signal(SIGUSR1) to signal_set
@@ -192,14 +191,14 @@ void* server_loop(int *arg) {
 
 			// wait for sending signal (SIGUSR1)
 			sigsuspend(&signal_set);
-			send(local_socket,raw_data,7,0); //send data to client here
+			//send(local_socket,raw_data,7,0); //send data to client here
 		}
 
 		if (recv_rtv < 0) {
 			perror("recv error\n");
 			exit(1);
 		}
-		
+
 		/*
 		bzero(raw_data,7);
 		raw_data[0] = 'M';
@@ -222,7 +221,7 @@ int main(int argc, char * argv[])
 	signal(SIGALRM, sig_handler);
 	signal(SIGTERM, sig_handler);
 
-	thread_array = (TRACKER *)malloc(0);
+	//thread_array = (TRACKER *)malloc(0);
 	random_seed = atol(argv[4]);
 	grid_size = atoi(argv[1]);
 	raw_grid_size = argv[1];
@@ -264,8 +263,8 @@ int main(int argc, char * argv[])
 
 		printf("accept successfully!\n");
 
-		//pthread_mutex_lock(&mutex_socket);
-		//pthread_mutex_lock(&mutex_thread_array);
+		pthread_mutex_lock(&mutex_socket);
+		pthread_mutex_lock(&mutex_thread_array);
 		copy_client = client_sock;
 
 		temp = pthread_create(&thread_id_client,NULL,server_loop,&copy_client);
