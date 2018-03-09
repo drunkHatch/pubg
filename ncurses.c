@@ -18,13 +18,15 @@ void init_win_params(WIN *p_win);
 void print_win_params(WIN *p_win);
 void create_box(WIN *win);
 void create_player(bool flag,int direction);
+void create_bullet(WIN *p_win,bool flag,int direction);
+
+int direction = 3;
 
 int main(int argc, char *argv[])
 {	WIN win;
 	WIN p_win;
 	
 	int ch;
-	int direction;
 	initscr();			/* Start curses mode 		*/
 	curs_set(0);
 	cbreak();			/* Line buffering disabled, Pass on
@@ -43,39 +45,55 @@ int main(int argc, char *argv[])
 	while((ch = getch()))
 	{	switch(ch)
 		{	case 'j':
+				create_bullet(&p_win,FALSE,direction);
 				if(player_x > p_win.startx+1){
-					create_player(FALSE,1);
+					direction = 1;
+					create_player(FALSE,direction);
 					--player_x;
-					create_player(TRUE,1);
+					create_player(TRUE,direction);
 				}
 				break;
 			case 'l':
+				create_bullet(&p_win,FALSE,direction);
 				if(player_x < p_win.startx+p_win.width-1 ){
-					create_player(FALSE,2);
+					direction = 2;
+					create_player(FALSE,direction);
 					++player_x;
-					create_player(TRUE,2);
+					create_player(TRUE,direction);
 				}
-				
 				break;
 			case 'i':
+				create_bullet(&p_win,FALSE,direction);
 				if(player_y > p_win.starty+1 ){
-					create_player(FALSE,3);
+					direction = 3;
+					create_player(FALSE,direction);
 					--player_y;
-					create_player(TRUE,3);
+					create_player(TRUE,direction);
 				}
 				break;
 			case 'k':
+				create_bullet(&p_win,FALSE,direction);
 				if(player_y < p_win.starty+p_win.height-1 ){
-					create_player(FALSE,4);
+					direction = 4;
+					create_player(FALSE,direction);
 					++player_y;
-					create_player(TRUE,4);
+					create_player(TRUE,direction);
 				}
 				break;	
+
+			case ' ':
+				create_bullet(&p_win,TRUE,direction);
+				break;
+				
+
 		}
 	}
 	endwin();			/* End curses mode		  */
 	return 0;
 }
+
+
+
 void init_win_params(WIN *p_win)
 {
 	p_win->height = 10;
@@ -120,24 +138,115 @@ void create_box(WIN *p_win)
 void create_player(bool flag,int direction){
 	
 	if(flag == TRUE && direction == 1)
-	{	mvaddch(player_y, player_x, '<');
-	
-	}
+	{	mvaddch(player_y, player_x, '<');}
+
 	else if(flag == TRUE && direction == 2)
-	{	mvaddch(player_y, player_x, '>');
+	{	mvaddch(player_y, player_x, '>');}
 
-	}
 	else if(flag == TRUE && direction == 3)
-	{	mvaddch(player_y, player_x, '^');
+	{	mvaddch(player_y, player_x, '^');}
 
-	}
+
 	else if(flag == TRUE && direction == 4)
-	{	mvaddch(player_y, player_x, 'v');
+	{	mvaddch(player_y, player_x, 'v');}
 
-	}
+
 	else{
 		mvaddch(player_y, player_x, ' ');
 	}
-	
+
 	refresh();
 }
+
+void create_bullet(WIN *p_win,bool flag,int direction){
+	if(flag == TRUE){
+		switch(direction)
+		{	case 1:
+				if(player_x > p_win->startx+2){
+					attron(A_BOLD);
+					mvaddch(player_y, player_x-1, 'o');
+					mvaddch(player_y, player_x-2, 'o');
+					attroff(A_BOLD);
+				}
+				else if(player_x == p_win->startx+2){
+					attron(A_BOLD);
+					mvaddch(player_y, player_x-1, 'o');
+					attroff(A_BOLD);
+				}
+				
+				break;
+
+			case 2:
+				if(player_x < p_win->startx + p_win->width-2){
+					attron(A_BOLD);
+					mvaddch(player_y, player_x+1, 'o');
+					mvaddch(player_y, player_x+2, 'o');
+					attroff(A_BOLD);
+				}
+				else if(player_x == (p_win->startx + p_win->width-2)){
+					attron(A_BOLD);
+					mvaddch(player_y, player_x+1, 'o');
+					attroff(A_BOLD);
+				}
+				
+				break;
+
+			case 3:
+				if(player_y > p_win->starty+2){
+					attron(A_BOLD);
+					mvaddch(player_y-1, player_x, 'o');
+					mvaddch(player_y-2, player_x, 'o');
+					attroff(A_BOLD);
+				}
+				else if(player_y == p_win->starty+2){
+					attron(A_BOLD);
+					mvaddch(player_y-1, player_x, 'o');
+					attroff(A_BOLD);
+				}
+				break;
+
+			case 4:
+				if(player_y < p_win->starty+p_win->height-2){
+					attron(A_BOLD);
+					mvaddch(player_y+1, player_x, 'o');
+					
+					mvaddch(player_y+2, player_x, 'o');
+					attroff(A_BOLD);
+				}
+				else if(player_y == p_win->starty+p_win->height-2){
+					attron(A_BOLD);
+					mvaddch(player_y+1, player_x, 'o');
+					attroff(A_BOLD);
+				}
+				break;}
+
+	}
+
+	else {
+		switch(direction)
+		{	case 1:	
+				mvaddch(player_y, player_x-1, ' ');
+				mvaddch(player_y, player_x-2, ' ');
+				break;
+
+			case 2:
+				mvaddch(player_y, player_x+1, ' ');
+				mvaddch(player_y, player_x+2, ' ');
+				break;
+
+			case 3:
+				mvaddch(player_y-1, player_x, ' ');
+				mvaddch(player_y-2, player_x, ' ');
+				break;
+			case 4:
+				mvaddch(player_y+1, player_x, ' ');
+				mvaddch(player_y+2, player_x, ' ');
+				break;
+	    }	
+	}
+
+	refresh();
+	}
+
+
+
