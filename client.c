@@ -11,6 +11,8 @@
 #include <pthread.h>
 
 #define	MY_PORT 2224
+#define SEND_LENGTH 100
+#define RECV_LENGTH 100
 
 /* ---------------------------------------------------------------------
    This is a sample client program for the number server. The client and
@@ -23,9 +25,12 @@ int init_sign = 0;
 //https://stackoverflow.com/questions/14888027/mutex-lock-threads
 
 int	sock, number;
-char temp_data[11];
 struct sockaddr_in server;
 struct hostent *host;
+char temp_sent;
+
+char message_to_send[SEND_LENGTH];
+char message_to_recv[RECV_LENGTH];
 
 void* key_handler_thread(void* param)
 {
@@ -74,12 +79,14 @@ int main()
 	int rtv;
 
 	host = gethostbyname("localhost");
+
 	if (host == NULL) {
 		perror ("Client: cannot get host description");
 		exit (1);
 	}
 
 	sock = socket(AF_INET, SOCK_STREAM, 0);
+
 	if (sock < 0) {
 		perror ("Client: cannot open socket");
 		exit (1);
@@ -95,15 +102,22 @@ int main()
 		exit (1);
 	}
 
-	bzero(temp_data,11);
+	bzero(message_to_recv,RECV_LENGTH);
 	// receive init data
-	temp_data[0] = 'c';
 
 	//send(sock,temp_data,11,0);
-	recv(sock,temp_data,5,0);
-	printf("recv success\n");
-	printf("%s\n", temp_data);
+	//recv(sock,temp_data,5,0);
+	while ((recv_rtv = recv(sock,message_to_recv,RECV_LENGTH,0)) >= 0) {
+		//do something to message_to_recv
 
+		// translate message to operations
+
+		// wait for sending signal (SIGUSR1)
+	}
+	if (recv_rtv < 0) {
+		perror("recv error\n");
+		exit(1);
+	}
 	/*******************************************************
 	block for setting local data
 	*******************************/

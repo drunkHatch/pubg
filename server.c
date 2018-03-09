@@ -37,42 +37,6 @@ TRACKER *thread_array;
 int thread_length = 0;
 int connection_count = 0;
 
-
-int get_tid_index(pthread_t item, pthread_t *t_array){
-
-}
-
-static void thread_sig_handler(int signo){
-	/*
-	how many signals
-	sigterm for daemon: shut down properly
-	sigalarm for all threads: get signal then send updated data
-
-	*/
-	if (signo == SIGUSR1){
-        sigaddset(&signal_set, SIGALRM);
-        sigaddset(&signal_set, SIGINT);
-        sigprocmask(0, &signal_set, NULL);
-        system("date");
-        dir = opendir(path);
-        if (ENOENT == errno){
-      //directory does not exist
-          printf("Directory has been deleted!\n");
-          exit(1);
-        }
-        dir_grabber(dir);
-        closedir(dir);
-        struct_move();
-        reporter();
-        signal(SIGUSR1, thread_sig_handler);
-        sigprocmask(1, &signal_set, NULL);
-    }
-	else{
-		perror("incorrect signal received by thread");
-		exit(1);
-	}
-}
-
 static void sig_handler(int signo){
 	/*
 	how many signals
@@ -98,20 +62,27 @@ static void sig_handler(int signo){
         sigaddset(&signal_set, SIGTERM);
         sigprocmask(0, &signal_set, NULL);
 
-		// send signal to all threads to send data to all clients
+		// send SIGUSR1 to all threads to send data to all clients
 		signal(SIGALRM, sig_handler);
         alarm(interval);
         sigprocmask(1, &signal_set, NULL);
-
     }
+	else{
+		perror("incorrect signal received by thread");
+		exit(1);
+	}
 }
 
 void* server_loop(int *arg) {
-		char imp[7];
+		char raw_data[7];
 		int local_socket;
 		int thread_place;
+		int recv_rtv;
 		TRACKER this_thread;
+		sigset_t signal_set;
 
+
+		// critical section initialization
 		local_socket = *arg; // store socket info to local var
 		thread_length++; // extend thread length
 		connection_count++;
@@ -122,14 +93,34 @@ void* server_loop(int *arg) {
 
 		pthread_mutex_unlock(&mutex_socket);
 		pthread_mutex_unlock(&mutex_thread_array);
+		// critical section ends
 
-		bzero(imp,7);
-		imp[0] = 'M';
-		imp[1] = 'M';
-		imp[2] = 'P';
-		imp[3] = 'D';
+		// add sending signal(SIGUSR1) to signal_set
+		sigemptyset(&signal_set);
+		sigaddset(&signal_set, SIGUSR1);
 
-		send(local_socket,imp,7,0);   //send dimension of board
+		send(local_socket,raw_data,7,0);   //send init data
+
+		while ((recv_rtv = recv(sock,raw_data,5,0)) >= 0) {
+			//do something to raw_data
+
+
+
+			// wait for sending signal (SIGUSR1)
+			sigsuspend(&signal_set);
+			send(local_socket,raw_data,7,0); //send data to client here
+		}
+		if (recv_rtv < 0) {
+			perror("recv error\n");
+			exit(1);
+		}
+		bzero(raw_data,7);
+		raw_data[0] = 'M';
+		raw_data[1] = 'M';
+		raw_data[2] = 'P';
+		raw_data[3] = 'D';
+
+
 
 		close(local_socket);
     }
@@ -143,6 +134,7 @@ int main(int argc, char * argv[])
 
 	signal(SIGALRM, sig_handler);
 	signal(SIGTERM, sig_handler);
+	signal(SIGUSR1, thread_sig_handler);
 
 	thread_array = (TRACKER *)malloc(0);
 	random_seed = atol(argv[4]);
